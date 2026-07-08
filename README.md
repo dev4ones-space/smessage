@@ -21,7 +21,7 @@
 ```
 
 # Demonstration
-**_a simple demo of encrypt & decrypt_**
+**_a simple demo of encrypt & decrypt_** _(if you need explanation, it is explained step-by-step in DemoExplained.md)_
 ```
 test/ $ ls
 total 32
