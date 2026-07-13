@@ -5,8 +5,8 @@ class Main:
     # Variables
     # Classes
     class Version:
-        ManageVersion = 3
-        Version = 1.1
+        ManageVersion = 4
+        Version = 1.2
         SubVersion = 1
         SubComment = ''
         BuildType = 'Stable' # Could be: Unstable (a default release, but may contain major/small bugs), Stable, Alpha (early versions, mostly very unstable or contains unfinished parts)
@@ -29,15 +29,30 @@ class Main:
         def DynamicContentHandle(Content: str|bytes, Passphrase: str, Mode: str, Salt: bytes):
             if Mode == 'Decrypt':  return act.Decrypt(Content, act.MakeFernetKey({'Passphrase': Passphrase, 'Salt': Salt}))
             elif Mode == 'Encrypt': return act.Encrypt(Content, act.MakeFernetKey({'Passphrase': Passphrase, 'Salt': Salt}))
+        def FetchArguments():
+            cache, cache2 = sys.argv, {}
+            for cache1 in range(len(cache)):
+                if '-' in cache[cache1]: cache2[cache[cache1].split('-')[1]] = cache[cache1+1]
+            return cache2
+        def ArgExists(Content, args):
+            try: return args[Content]
+            except: return False
+        def ArgBool(Content, args):
+            try: return args[Content].strip().lower() in ('true', '1', 'yes')
+            except: return False
+
 # Init
-act = Main.Activities
+act = Main.Activities; args = act.FetchArguments()
 # Main
 if __name__ == '__main__':
-    cache, cache1 = ast.literal_eval(sys.argv[1]), ast.literal_eval(sys.argv[2])
+    if args == {} or not all(i in list(args.keys()) for i in ['i', 'm', 'p']): print(f'SMessage {Main.Version.BuildShow}\nThis activity requires an argument. Read README.md for documentation of use.\n\nUse:\n {sys.argv[0]} [-i INPUT_FILE] [-p PASSPHRASE] [-m MODE] ...'); exit(0)
+    cache, cache1 = args['i'], {'Salt': act.ArgExists('s', args), 'Mode': args['m'], 'Passphrase': args['p'], 'SaveSalt': act.ArgBool('ss', args), 'IsBinary': act.ArgBool('b', args), 'SaltIncludedInFile': act.ArgBool('sif', args)}
+    if cache1['Salt'] == False and cache1['SaltIncludedInFile'] == False: print(f'SMessage {Main.Version.BuildShow}\nThis activity requires an argument. Read README.md for documentation of use.\n\nUse:\n {sys.argv[0]} [-i INPUT_FILE] [-p PASSPHRASE] [-m MODE] ...'); exit(0)
+    if isinstance(cache1['Salt'], str) and cache1['Salt'] != 'gen': cache1['Salt'] = bytes.fromhex(cache1['Salt'])
     if cache1['Mode'] == 'Encrypt':
         if cache1['IsBinary'] is True: cache2 = act.io(cache, 'rb').decode('latin-1')
         else: cache2 = act.io(cache, 'r')
-        if cache1['Salt'] == 'gen': cache1['Salt'] = os.urandom(64); print(f'debug: Generated Salt: {cache1['Salt']}')
+        if cache1['Salt'] == 'gen': cache1['Salt'] = os.urandom(64); print(f'debug: Generated Salt: {bytes.hex(cache1['Salt'])}')
         if cache1['SaveSalt'] is True: act.io(f'{cache}.esms', 'wb', cache1['Salt'])
         act.io(f'{cache}.esm', 'w', act.DynamicContentHandle(cache2, cache1['Passphrase'], cache1['Mode'], cache1['Salt']).decode('ascii'))
     elif cache1['Mode'] == 'Decrypt':

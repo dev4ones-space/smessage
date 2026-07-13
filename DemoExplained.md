@@ -15,27 +15,32 @@ drwxr-xr-x  12 test  staff   384B  8 Jul 21:45 .git
 test/ $ echo 'very secret content' > test.txt 
 
  # executing a main.py script to encrypt test.txt with password of 'YEEZY222' and random generated salt (also a option to put generated salt included with file inside test.esms)
-test/ $ python3 main.py "'test.txt'" "{'Mode': 'Encrypt', 'Passphrase': 'YEEZY222', 'Salt': 'gen', 'IsBinary': False, 'SaltIncludedInFile': False, 'SaveSalt': True}"
-debug: Generated Salt: b'C&.\xe1V\xa1\x1b?\x98\xd0\x7f\x04rAc\xf3\xf4\x0e\xc5\xf3d4\x95>\xd1\xb4>GQh\x8dg\xf3\xb4\xb5\x14i\xaf3\xb7\xc9\x12`\xcb,\xdcc\x0f\xba\n\xf1\xa5JNgn\xc5\x8b\xe0\xfd\x8cw\x96\x9b'
+test/ $ python3 main.py -i test.txt -s 'gen' -p 'test' -ss True -m Encrypt
+debug: Generated Salt: 4d5cbe10f41a1e839f3bdaea94b2f3ff0573831d6077a527d1e910c3bfbbeef3ef3c98aafc0bd4a2509ad338c6e806cd63819084dcbc115c40706c765170311d
 
  # showing that test.esm contains encrypted payload
 test/ $ cat test.txt.esm | tail -20
-gAAAAABqTp0_1D3L9NRnupUl8iCpbDLiRxp42SiVSsl6ZFUKwGX14jdRgVx8p6RF10cBkC4IFfUYcfHogRhpuVEyFmDURuy8sG_40OXHJirTBGKoba5qza4=%        
+gAAAAABqVQHcjo1lczwa9pnupCSrVONin0u7UfjPvh6UpP4oeKuOZHXc4PFUxpqBwOIDa-kAe1Zw1yok6LQuhYWeGXrjYcAX1eio3RtWLTG_vObptn24F7I=%  
 
- # remove test.txt (so decrypted file could be written in future)
+ # remove test.txt (so decrypted file couldn't be fabricated or read by script, basically "proof")
 test/ $ rm test.txt
 
  # showing that there's nothin there
 test/ $ cat test.txt
 cat: test.txt: No such file or directory
 
+ # decrypting file with same credentials (salt from print, fixed old bug where it was salt and not interpreted correctly)
+test/ $ python3 main.py -i test.txt.esm -s '4d5cbe10f41a1e839f3bdaea94b2f3ff0573831d6077a527d1e910c3bfbbeef3ef3c98aafc0bd4a2509ad338c6e806cd63819084dcbc115c40706c765170311d' -p 'test' -m Decrypt
+
+or
+
  # decrypting file with same credentials (also has a option to take salt from test.esms)
-test/ $ python3 main.py "'test.txt.esm'" "{'Mode': 'Decrypt', 'Passphrase': 'YEEZY222', 'Salt': '', 'IsBinary': False, 'SaltIncludedInFile': True, 'SaveSalt': False}"
+test/ $ python3 main.py -i test.txt.esm -sif True -p 'test' -m Decrypt
 
  # showing that decrypted content mathes original content that was encrypted
 test/ $ cat test.txt
 very secret content
 ```
 
-- Everything is done in new repo of commit 05a82b4b4961cf2d8d5952c053980a8d041aa0bb
-- Run in ZSH of Darwin machine (basically a macOS)
+- Everything is done in new repo of commit _check never commit, this one is right berfore commit change_
+- Run in ZSH of macOS machine
