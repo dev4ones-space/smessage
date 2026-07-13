@@ -42,5 +42,5 @@ test/ $ cat test.txt
 very secret content
 ```
 
-- Everything is done in new repo of commit _check never commit, this one is right berfore commit change_
+- Everything is done in new repo of commit bca4efe10f0c0c83bb35b21156a99d8fbc654af4
 - Run in ZSH of macOS machine
